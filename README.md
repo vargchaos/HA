@@ -1,1 +1,1 @@
-My confige Home Assistant
+My config Home Assistant
