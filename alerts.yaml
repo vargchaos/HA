@@ -1,0 +1,80 @@
+server_brdua_virtual_down:
+    name: "server Brdua Virtual Serveris down"
+    message: "Alarma! El tecnica fatal, Brdua Virtual Server, La scopata!"
+    entity_id: binary_sensor.192_168_0_88
+    state: "off"
+    repeat: 480
+    can_acknowledge: false
+    skip_first: false
+    notifiers:
+      - notify.mobile_app_rmx3521
+      - notify.mobile_app_varg
+      - mobile_app_rmx3521
+      - mobile_app_varg
+      
+#server_alliance_down:
+    #name: "server Alliance is down"
+    #message: "Alarma! El tecnica fatal, Alliance Server, La scopata!"
+    #entity_id: binary_sensor.192_168_0_100
+    #state: "off"
+    #repeat:
+    #can_acknowledge: false
+    #skip_first: false
+    #notifiers:
+    #- notify.mobile_app_rmx3521
+      #- notify.mobile_app_varg
+      #- mobile_app_rmx3521
+      #- mobile_app_varg
+      
+server_cheamagro_down:
+    name: "server CheamAgro is down"
+    message: "Alarma! El tecnica fatal, CheamAgro Server, La scopata!"
+    entity_id: binary_sensor.192_168_0_101
+    state: "off"
+    repeat: 480
+    can_acknowledge: false
+    skip_first: false
+    notifiers:
+      - notify.mobile_app_rmx3521
+      - notify.mobile_app_varg
+      - mobile_app_rmx3521
+      - mobile_app_varg
+      
+server_life_down:
+    name: "server Life is down"
+    message: "Alarma! El tecnica fatal, Life Server, La scopata!"
+    entity_id: binary_sensor.192_168_0_250
+    state: "off"
+    repeat: 480
+    can_acknowledge: false
+    skip_first: false
+    notifiers:
+      - notify.mobile_app_rmx3521
+      - notify.mobile_app_varg
+      - mobile_app_rmx3521
+      - mobile_app_varg
+      
+server_home_dvr_down:
+    name: "server Home Dvr is down"
+    message: "Alarma! El tecnica fatal, Home DVR, La scopata!"
+    entity_id: binary_sensor.192_168_0_252
+    state: "off"
+    repeat: 480
+    can_acknowledge: false
+    skip_first: false
+    notifiers:
+      - notify.telegram
+      
+server_nas_down:
+    name: "server Nas is down"
+    message: "Alarma! El tecnica fatal, NAS, La scopata!"
+    entity_id: binary_sensor.192_168_0_252
+    state: "off"
+    repeat: 480
+    can_acknowledge: false
+    skip_first: false
+    notifiers:
+      - notify.mobile_app_rmx3521
+      - notify.mobile_app_varg
+      - mobile_app_rmx3521
+      - mobile_app_varg
