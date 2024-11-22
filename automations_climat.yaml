@@ -1,0 +1,51 @@
+- id: Зволожувач_on
+  alias: Зволожувач on
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.termometr_humidity
+      below: 40
+  conditions: []
+  action:
+    - service: homeassistant.turn_on
+      target:
+        entity_id: switch.rozetka_zvolozhuvach_socket_1
+  initial_state: 'on'
+
+- id: Зволожувач_off
+  alias: Зволожувач off
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.termometr_humidity
+      above: 60
+  conditions: []
+  action:
+    - service: homeassistant.turn_off
+      target:
+        entity_id: switch.rozetka_zvolozhuvach_socket_1
+  initial_state: 'on'
+
+- id: Кондиціонер_on
+  alias: Кондиціонер on
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.termometr_temperature
+      below: 21.5
+  conditions: []
+  action:
+    - service: homeassistant.turn_on
+      target:
+        entity_id: switch.rozetka_konditsionera_local_none
+  initial_state: 'on'
+
+- id: Кондиціонер_off
+  alias: Кондиціонер off
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.termometr_temperature
+      above: 22.5
+  conditions: []
+  action:
+    - service: homeassistant.turn_off
+      target:
+        entity_id: switch.rozetka_konditsionera_local_none
+  initial_state: 'on'
