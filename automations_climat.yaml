@@ -24,26 +24,64 @@
         entity_id: switch.rozetka_zvolozhuvach_socket_1
   initial_state: 'on'
 
-- id: Кондиціонер_on
-  alias: Кондиціонер on
+- id: Кондиціонер_on_day
+  alias: Кондиціонер on (день)
   trigger:
     - platform: numeric_state
       entity_id: sensor.termometr_temperature
-      below: 21.5
-  conditions: []
+      below: 22.5
+  condition:
+    - condition: time
+      after: "08:00:00"
+      before: "23:00:00"
   action:
     - service: homeassistant.turn_on
       target:
         entity_id: switch.rozetka_konditsionera_local_none
   initial_state: 'on'
 
-- id: Кондиціонер_off
-  alias: Кондиціонер off
+- id: Кондиціонер_off_day
+  alias: Кондиціонер off (день)
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.termometr_temperature
+      above: 23
+  condition:
+    - condition: time
+      after: "08:00:00"
+      before: "23:00:00"
+  action:
+    - service: homeassistant.turn_off
+      target:
+        entity_id: switch.rozetka_konditsionera_local_none
+  initial_state: 'on'
+
+- id: Кондиціонер_on_night
+  alias: Кондиціонер on (ніч)
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.termometr_temperature
+      below: 21.5
+  condition:
+    - condition: time
+      after: "23:00:00"
+      before: "08:00:00"
+  action:
+    - service: homeassistant.turn_on
+      target:
+        entity_id: switch.rozetka_konditsionera_local_none
+  initial_state: 'on'
+
+- id: Кондиціонер_off_night
+  alias: Кондиціонер off (ніч)
   trigger:
     - platform: numeric_state
       entity_id: sensor.termometr_temperature
       above: 22.5
-  conditions: []
+  condition:
+    - condition: time
+      after: "23:00:00"
+      before: "08:00:00"
   action:
     - service: homeassistant.turn_off
       target:
