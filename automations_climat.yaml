@@ -29,7 +29,7 @@
   trigger:
     - platform: numeric_state
       entity_id: sensor.termometr_temperature
-      below: 22.5
+      below: 22.0
   condition:
     - condition: time
       after: "08:00:00"
@@ -45,7 +45,7 @@
   trigger:
     - platform: numeric_state
       entity_id: sensor.termometr_temperature
-      above: 23
+      above: 22.5
   condition:
     - condition: time
       after: "08:00:00"
@@ -61,7 +61,7 @@
   trigger:
     - platform: numeric_state
       entity_id: sensor.termometr_temperature
-      below: 21.5
+      below: 21.0
   condition:
     - condition: time
       after: "23:00:00"
@@ -77,7 +77,7 @@
   trigger:
     - platform: numeric_state
       entity_id: sensor.termometr_temperature
-      above: 22.5
+      above: 21.5
   condition:
     - condition: time
       after: "23:00:00"
