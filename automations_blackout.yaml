@@ -91,3 +91,21 @@
       target:
         entity_id: switch.miwifi_5c_02_14_30_28_9b_wifi_guest
   initial_state: "on"
+
+- id: notify_low_battery_level
+  alias: Notify Low Battery Level
+  description: "Send notification when battery level reaches 20%"
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.delta_2_main_battery_level
+      below: 20
+  condition:
+    - condition: template
+      value_template: >
+        {{ states('sensor.delta_2_main_battery_level') | float < 20 and
+           states('sensor.delta_2_ac_in_power') | float == 0 }}
+  action:
+    # Відправка сповіщення у Telegram
+    - service: notify.telegram
+      data:
+        message: "⚠️ Рівень заряду батареї опустився до 20%!"

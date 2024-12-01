@@ -14,10 +14,6 @@ input_datetime: !include input_datetime.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
-# Видалено ці записи, їх потрібно перенести в secrets.yaml
-# password: !secret my_password
-# token: !secret my_token
-
 python_script:
 
 climate:
@@ -87,3 +83,32 @@ sensor:
         unit_of_measurement: 'W'
         device_class: power
         value_template: "{{ states('sensor.delta_2_solar_in_power') | float(0) }}"
+
+      total_grid_power:
+        friendly_name: "Загальне споживання з мережі"
+        unit_of_measurement: 'W'
+        device_class: energy
+        value_template: >
+          {{ states('sensor.rozetka_konditsionera_local_zhivlennia') | float(0) +
+             states('sensor.rozetka_kholodilnika_local_zhivlennia') | float(0) +
+             states('sensor.rozetka_cheamagro_local_zhivlennia') | float(0) +
+             states('sensor.rozetka_life_local_zhivlennia') | float(0) +
+             states('sensor.delta_2_total_in_power') | float(0) }}
+
+      average_voltage:
+        friendly_name: "Середня напруга"
+        value_template: >
+          {{ ((states('sensor.rozetka_konditsionera_local_napruga')|float +
+              states('sensor.rozetka_kholodilnika_local_napruga')|float +
+              states('sensor.rozetka_cheamagro_local_napruga')|float +
+              states('sensor.rozetka_life_local_napruga')|float) / 4) | round(2) }}
+        unit_of_measurement: "В"
+
+      max_voltage:
+        friendly_name: "Максимальна напруга"
+        value_template: >
+          {{ [states('sensor.rozetka_konditsionera_local_napruga')|float,
+              states('sensor.rozetka_kholodilnika_local_napruga')|float,
+              states('sensor.rozetka_cheamagro_local_napruga')|float,
+              states('sensor.rozetka_life_local_napruga')|float] | max }}
+        unit_of_measurement: "В"
