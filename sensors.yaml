@@ -1,0 +1,124 @@
+# AC потужність зарядки
+- platform: template
+  sensors:
+    ac_in_power:
+      friendly_name: "AC потужність зарядки"
+      unit_of_measurement: 'W'
+      device_class: power
+      value_template: "{{ states('sensor.delta_2_ac_in_power') | float(0) }}"
+
+    ac_out_power:
+      friendly_name: "AC потужність на виході"
+      unit_of_measurement: 'W'
+      device_class: power
+      value_template: "{{ states('sensor.delta_2_ac_out_power') | float(0) }}"
+
+    battery_level:
+      friendly_name: "Рівень заряду батареї"
+      unit_of_measurement: '%'
+      device_class: battery
+      value_template: "{{ states('sensor.delta_2_battery_level') | float(0) }}"
+
+    solar_in_power:
+      friendly_name: "Сонячна енергія (вхід)"
+      unit_of_measurement: 'W'
+      device_class: power
+      value_template: "{{ states('sensor.delta_2_solar_in_power') | float(0) }}"
+
+    total_grid_power:
+      friendly_name: "Загальне споживання з мережі"
+      unit_of_measurement: 'W'
+      device_class: energy
+      value_template: >
+        {{ states('sensor.rozetka_konditsionera_local_zhivlennia') | float(0) +
+           states('sensor.rozetka_kholodilnika_local_zhivlennia') | float(0) +
+           states('sensor.rozetka_cheamagro_local_zhivlennia') | float(0) +
+           states('sensor.rozetka_life_local_zhivlennia') | float(0) }}
+
+    average_voltage:
+      friendly_name: "Середня напруга"
+      unit_of_measurement: "В"
+      value_template: >
+        {{ ((states('sensor.rozetka_konditsionera_local_napruga')|float +
+             states('sensor.rozetka_kholodilnika_local_napruga')|float +
+             states('sensor.rozetka_cheamagro_local_napruga')|float +
+             states('sensor.rozetka_life_local_napruga')|float) / 4) | round(2) }}
+
+    max_voltage:
+      friendly_name: "Максимальна напруга"
+      unit_of_measurement: "В"
+      value_template: >
+        {{ [states('sensor.rozetka_konditsionera_local_napruga')|float,
+            states('sensor.rozetka_kholodilnika_local_napruga')|float,
+            states('sensor.rozetka_cheamagro_local_napruga')|float,
+            states('sensor.rozetka_life_local_napruga')|float] | max }}
+
+    main_remain_capacity_ah:
+      friendly_name: "Ємність, Ecowlow Delta 2 (Ah)"
+      unit_of_measurement: 'Ah'
+      value_template: >
+        {% if states('sensor.delta_2_main_remain_capacity')|float(0) > 0 %}
+          {{ (states('sensor.delta_2_main_remain_capacity')|float(0) / 1000) | round(2) }}
+        {% else %}
+          0
+        {% endif %}
+
+    battery_power:
+      friendly_name: "Потужність батареї Ecowlow Delta 2"
+      unit_of_measurement: 'W'
+      device_class: power
+      value_template: >
+        {% if states('sensor.delta_2_main_remain_capacity')|float(0) > 0 and states('sensor.delta_2_battery_volts')|float(0) > 0 %}
+          {{ ((states('sensor.delta_2_main_remain_capacity')|float(0) / 1000) * states('sensor.delta_2_battery_volts')|float(0)) | round(2) }}
+        {% else %}
+          0
+        {% endif %}
+
+    delta_2_day_battery_charge:
+      friendly_name: "Денний заряд батареї (Wh)"
+      unit_of_measurement: 'Wh'
+      value_template: >
+        {% if states('sensor.delta_2_total_in_power')|float(0) > 0 %}
+          {{ (states('sensor.delta_2_total_in_power')|float(0) * 24) | round(2) }}
+        {% else %}
+          0
+        {% endif %}
+
+    delta_2_day_battery_discharge:
+      friendly_name: "Денний розряд батареї (Wh)"
+      unit_of_measurement: 'Wh'
+      value_template: >
+        {% if states('sensor.delta_2_total_out_power')|float(0) > 0 %}
+          {{ (states('sensor.delta_2_total_out_power')|float(0) * 24) | round(2) }}
+        {% else %}
+          0
+        {% endif %}
+
+    delta_2_inverter_current:
+      friendly_name: "Ток інвертора"
+      unit_of_measurement: 'A'
+      device_class: current
+      value_template: >
+        {% if states('sensor.delta_2_total_out_power')|float(0) > 0 and states('sensor.delta_2_battery_volts')|float(0) > 0 %}
+          {{ (states('sensor.delta_2_total_out_power')|float(0) / states('sensor.delta_2_battery_volts')|float(0) * 0.9) | round(2) }}
+        {% else %}
+          0
+        {% endif %}
+        
+    total_grid_power_day:
+      friendly_name: "Мережа за добу (Wh)"
+      unit_of_measurement: 'Wh'
+      value_template: >
+        {% set current = states('sensor.total_grid_power') | float(0) %}
+        {% set last_reset = states('input_datetime.grid_power_last_reset') | as_timestamp %}
+        {% set now = now().timestamp() %}
+        {{ ((current - (last_reset if last_reset else 0)) / 3600 * 24) | round(2) }}
+
+    total_power_day:
+      friendly_name: "Всього за день (Wh)"
+      unit_of_measurement: 'Wh'
+      value_template: >
+        {% set grid = states('sensor.total_grid_power_day') | float(0) %}
+        {% set discharge = states('sensor.delta_2_day_battery_discharge') | float(0) %}
+        {{ (grid + discharge) | round(2) }}:
+      

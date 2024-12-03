@@ -1,0 +1,17 @@
+  - id: reset_statistics_manual
+    alias: "Reset statistics manually"
+    trigger:
+      - platform: state
+        entity_id: input_boolean.reset_statistics
+        to: "on"
+    action:
+      - service: homeassistant.update_entity
+        target:
+          entity_id:
+            - sensor.total_grid_power_day
+            - sensor.delta_2_day_battery_discharge
+            - sensor.delta_2_day_battery_charge
+            - sensor.total_power_day
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.reset_statistics

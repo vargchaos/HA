@@ -13,6 +13,8 @@ input_text: !include input_text.yaml
 input_datetime: !include input_datetime.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
+sensor: !include sensors.yaml
+
 
 python_script:
 
@@ -41,74 +43,8 @@ notify:
     platform: telegram
     chat_id: !secret telegram_chat_id
 
-sensor:
-  - platform: history_stats
-    name: "Отримані дані за сьогодні (Gb)"
-    entity_id: sensor.miwifi_router_data_received
-    state: 'Gb'
-    type: time
-    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
-    end: "{{ now() }}"
-
-  - platform: history_stats
-    name: "Відвантажені дані за сьогодні (Gb)"
-    entity_id: sensor.miwifi_router_data_sent
-    state: 'Gb'
-    type: time
-    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
-    end: "{{ now() }}"
-
-  - platform: template
-    sensors:
-      ac_in_power:
-        friendly_name: "AC потужність зарядки"
-        unit_of_measurement: 'W'
-        device_class: power
-        value_template: "{{ states('sensor.delta_2_ac_in_power') | float(0) }}"
-      
-      ac_out_power:
-        friendly_name: "AC потужність на виході"
-        unit_of_measurement: 'W'
-        device_class: power
-        value_template: "{{ states('sensor.delta_2_ac_out_power') | float(0) }}"
-
-      battery_level:
-        friendly_name: "Рівень заряду батареї"
-        unit_of_measurement: '%'
-        device_class: battery
-        value_template: "{{ states('sensor.delta_2_battery_level') | float(0) }}"
-
-      solar_in_power:
-        friendly_name: "Сонячна енергія (вхід)"
-        unit_of_measurement: 'W'
-        device_class: power
-        value_template: "{{ states('sensor.delta_2_solar_in_power') | float(0) }}"
-
-      total_grid_power:
-        friendly_name: "Загальне споживання з мережі"
-        unit_of_measurement: 'W'
-        device_class: energy
-        value_template: >
-          {{ states('sensor.rozetka_konditsionera_local_zhivlennia') | float(0) +
-             states('sensor.rozetka_kholodilnika_local_zhivlennia') | float(0) +
-             states('sensor.rozetka_cheamagro_local_zhivlennia') | float(0) +
-             states('sensor.rozetka_life_local_zhivlennia') | float(0) +
-             states('sensor.delta_2_total_in_power') | float(0) }}
-
-      average_voltage:
-        friendly_name: "Середня напруга"
-        value_template: >
-          {{ ((states('sensor.rozetka_konditsionera_local_napruga')|float +
-              states('sensor.rozetka_kholodilnika_local_napruga')|float +
-              states('sensor.rozetka_cheamagro_local_napruga')|float +
-              states('sensor.rozetka_life_local_napruga')|float) / 4) | round(2) }}
-        unit_of_measurement: "В"
-
-      max_voltage:
-        friendly_name: "Максимальна напруга"
-        value_template: >
-          {{ [states('sensor.rozetka_konditsionera_local_napruga')|float,
-              states('sensor.rozetka_kholodilnika_local_napruga')|float,
-              states('sensor.rozetka_cheamagro_local_napruga')|float,
-              states('sensor.rozetka_life_local_napruga')|float] | max }}
-        unit_of_measurement: "В"
+input_boolean:
+  reset_statistics:
+    name: Reset Statistics
+    initial: off
+    icon: mdi:refresh
