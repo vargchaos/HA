@@ -1,0 +1,140 @@
+- id: "turn_on_lamp_dark"
+  alias: "Ввімкнення лампи при темряві, якщо я вдома, з 16:00 до 22:00"
+  trigger:
+    - platform: state
+      entity_id: sensor.unknown_light_level
+      to: '0'
+      for: "00:05:00"
+  condition:
+    - condition: state
+      entity_id: device_tracker.miwifi_90_df_7d_f7_9c_d1
+      state: 'home'
+    - condition: state
+      entity_id: light.unknown_lamp
+      state: 'off'
+    - condition: state
+      entity_id: light.lampa_vitalnia
+      state: 'off'
+    - condition: time
+      after: '16:00:00'
+      before: '22:00:00'
+  action:
+    - service: light.turn_on
+      target:
+        entity_id:
+          - light.unknown_lamp
+          - light.lampa_vitalnia
+      data:
+        brightness_pct: 1
+        color_temp: 250
+    - repeat:
+        sequence:
+          - delay: "00:00:18"
+          - service: light.turn_on
+            target:
+              entity_id:
+                - light.unknown_lamp
+                - light.lampa_vitalnia
+            data:
+              brightness_step_pct: 1
+        until:
+          - condition: template
+            value_template: >
+              {{ state_attr('light.unknown_lamp', 'brightness') | int >= 255
+                 and state_attr('light.lampa_vitalnia', 'brightness') | int >= 255 }}
+
+- id: "turn_off_lamp_when_bright"
+  alias: "Вимкнення лампи і дисплея при світлі"
+  trigger:
+    - platform: state
+      entity_id: sensor.unknown_light_level
+      from: '0'
+      for: "00:05:00"
+  condition:
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: light.unknown_lamp
+          state: 'on'
+        - condition: state
+          entity_id: light.lampa_vitalnia
+          state: 'on'
+  action:
+    - service: light.turn_off
+      target:
+        entity_id:
+          - light.unknown_lamp
+          - light.lampa_vitalnia
+    - service: select.select_option
+      target:
+        entity_id: select.unknown_display_mode
+      data:
+        option: "Off"
+
+- id: 'liustra_unknown_lamp_sync'
+  alias: Взаємодія люстри та невідомої лампи
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: light.liustra_v_vitalni
+      to: 'on'
+    - platform: state
+      entity_id: light.liustra_v_vitalni
+      to: 'off'
+  action:
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: light.liustra_v_vitalni
+              state: 'on'
+          sequence:
+            - service: input_text.set_value
+              target:
+                entity_id: input_text.unknown_lamp_previous_state
+              data:
+                value: "{{ states('light.unknown_lamp') }}"
+            - service: input_text.set_value
+              target:
+                entity_id: input_text.lampa_vitalnia_previous_state
+              data:
+                value: "{{ states('light.lampa_vitalnia') }}"
+            - service: light.turn_off
+              target:
+                entity_id:
+                  - light.unknown_lamp
+                  - light.lampa_vitalnia
+        - conditions:
+            - condition: state
+              entity_id: light.liustra_v_vitalni
+              state: 'off'
+          sequence:
+            - choose:
+                - conditions:
+                    - condition: template
+                      value_template: "{{ states('input_text.unknown_lamp_previous_state') == 'on' }}"
+                  sequence:
+                    - service: light.turn_on
+                      target:
+                        entity_id: light.unknown_lamp
+                - conditions:
+                    - condition: template
+                      value_template: "{{ states('input_text.unknown_lamp_previous_state') == 'off' }}"
+                  sequence:
+                    - service: light.turn_off
+                      target:
+                        entity_id: light.unknown_lamp
+            - choose:
+                - conditions:
+                    - condition: template
+                      value_template: "{{ states('input_text.lampa_vitalnia_previous_state') == 'on' }}"
+                  sequence:
+                    - service: light.turn_on
+                      target:
+                        entity_id: light.lampa_vitalnia
+                - conditions:
+                    - condition: template
+                      value_template: "{{ states('input_text.lampa_vitalnia_previous_state') == 'off' }}"
+                  sequence:
+                    - service: light.turn_off
+                      target:
+                        entity_id: light.lampa_vitalnia

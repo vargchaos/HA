@@ -1,0 +1,31 @@
+- id: log_new_device_telegram
+  alias: Повідомлення про новий пристрій у Telegram та лог
+  trigger:
+    - platform: event
+      event_type: device_registry_updated
+      event_data:
+        action: create
+  variables:
+    log_text: >
+      [{{ now().strftime('%Y-%m-%d %H:%M:%S') }}] Новий пристрій:
+      Назва: {{ device_attr(trigger.event.data.device_id, 'name') | default('невідомо') }},
+      Виробник: {{ device_attr(trigger.event.data.device_id, 'manufacturer') | default('невідомо') }},
+      Модель: {{ device_attr(trigger.event.data.device_id, 'model') | default('невідомо') }},
+      Тип підключення: {{
+        'Wi-Fi' if device_attr(trigger.event.data.device_id, 'connections') | selectattr('0', 'equalto', 'mac') | list | count > 0
+        else 'Bluetooth' if device_attr(trigger.event.data.device_id, 'connections') | selectattr('0', 'equalto', 'bluetooth') | list | count > 0
+        else 'невідомо'
+      }},
+      Ідентифікатор: {{
+        device_attr(trigger.event.data.device_id, 'connections')[0][1]
+        if device_attr(trigger.event.data.device_id, 'connections') | length > 0 else 'немає'
+      }}
+  action:
+    - service: notify.telegram
+      data:
+        message: >
+          🆕 Новий пристрій знайдено!
+          {{ log_text }}
+    - service: notify.discovered_devices_logger
+      data:
+        message: "{{ log_text }}"

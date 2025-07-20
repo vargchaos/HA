@@ -1,0 +1,100 @@
+- id: foto_liudini_yakshcho_v_zone
+  alias: "[Frigate] Фото людини — якщо ще в зоні після 5 секунд"
+  trigger:
+    - platform: state
+      entity_id: sensor.cam1_person_count
+      from: "0"
+
+  condition:
+    - condition: template
+      value_template: >
+        {{ trigger.to_state.state | int > 0 }}
+
+  action:
+    - variables:
+        timestamp: "{{ now().strftime('%Y%m%d_%H%M%S') }}"
+        snapshot_path: "/config/www/tmp/person_{{ timestamp }}.jpg"
+
+    # Робимо знімок одразу після тригера
+    - service: camera.snapshot
+      data:
+        entity_id: camera.cam_01
+        filename: "{{ snapshot_path }}"
+
+    # Чекаємо 5 секунд
+    - delay: "00:00:05"
+
+    # Якщо людина досі в кадрі — надсилаємо
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('sensor.cam1_person_count') | int > 0 }}
+          sequence:
+            - service: notify.telegram
+              data:
+                message: "Людина перед дверима"
+                data:
+                  photo:
+                    - file: "{{ snapshot_path }}"
+                      caption: "Людина перед дверима"
+
+    # Видалення знімку
+    - service: shell_command.delete_file
+      data:
+        path: "{{ snapshot_path }}"
+
+  mode: parallel
+
+  
+  
+  
+- id: foto_liudini_z_frigate
+  alias: "[Frigate] Фото людини — зображення з Frigate після 5 секунд"
+  trigger:
+    - platform: mqtt
+      topic: frigate/events
+  condition:
+    - condition: template
+      value_template: >
+        {{ trigger.payload_json['type'] == 'new' and
+           trigger.payload_json['after']['label'] == 'person' }}
+  variables:
+    event_id: "{{ trigger.payload_json['after']['id'] }}"
+    filename: "cam1-{{ event_id }}.jpg"
+    source_path: "/media/frigate/clips/{{ filename }}"
+    dest_path: "/config/www/frigate_snapshots/{{ filename }}"
+  action:
+    - delay: "00:00:05"
+
+    - service: system_log.write
+      data:
+        level: warning
+        message: "[Frigate] Копіювання {{ source_path }} → {{ dest_path }}"
+
+    - service: shell_command.copy_frigate_snapshot
+      data:
+        source: "{{ source_path }}"
+        dest: "{{ dest_path }}"
+
+    - delay: "00:00:05"  # Невелика пауза після копіювання
+
+    - service: system_log.write
+      data:
+        level: warning
+        message: "[Frigate] Надсилання файлу: {{ dest_path }}"
+
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ dest_path | string | regex_search('.*\\.jpg$') }}"
+          sequence:
+            - service: notify.telegram
+              data:
+                message: "Людина перед дверима (фото з Frigate)"
+                data:
+                  photo:
+                    - file: "{{ dest_path }}"
+                      caption: "Frigate: Людина перед дверима"
+
+  mode: parallel

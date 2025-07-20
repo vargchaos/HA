@@ -1,0 +1,18 @@
+alias: Вимкнення пралки після завершення прання
+id: pralka_off_after_wash
+description: Вимикає пралку та надсилає повідомлення в Telegram після завершення прання.
+trigger:
+  - platform: numeric_state
+    entity_id: sensor.rozetka_pralka_zhivlennia
+    below: 5
+    for:
+      minutes: 1
+condition: []
+action:
+  - service: switch.turn_off
+    target:
+      entity_id: switch.rozetka_pralka
+  - service: notify.telegram
+    data:
+      message: "Прання завершено, пральна машина вимкнена."
+mode: single

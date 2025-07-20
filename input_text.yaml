@@ -1,0 +1,10 @@
+  switch_rozetka_cheamagro_local_none_initial_state:
+    name: "Початковий стан розетки CheamAgro"
+  switch_rozetka_kholodilnika_local_none_initial_state:
+    name: "Початковий стан розетки холодильника"
+  switch_rozetka_konditsionera_local_none_initial_state:
+    name: "Початковий стан розетки кондиціонера"
+  switch_rozetka_life_local_none_initial_state:
+    name: "Початковий стан розетки Life"
+  unknown_lamp_previous_state:
+    name: "Попередній стан невідомої лампи"

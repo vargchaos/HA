@@ -8,13 +8,21 @@ frontend:
 alert: !include alerts.yaml
 automation: !include automations.yaml
 automation blackouts: !include automations_blackout.yaml
+automation cams: !include automations_cam.yaml
 automation climats: !include automations_climat.yaml
+automation devices: !include automations_devise.yaml
+automation light: !include automations_light.yaml
+automation prannya: !include automations_prannya.yaml
 input_text: !include input_text.yaml
 input_datetime: !include input_datetime.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 sensor: !include sensors.yaml
+utility_meter: !include utility_meter.yaml
 
+http:
+  ssl_certificate: /ssl/fullchain.pem
+  ssl_key: /ssl/privkey.pem
 
 python_script:
 
@@ -28,23 +36,56 @@ climate:
       remote_entity: remote.broadlink_rc4c_mini
       delay_secs: 0.5
       num_repeats: 2
-    temperature_sensor: sensor.termometr_temperature
-    humidity_sensor: sensor.termometr_humidity
+    temperature_sensor: sensor.termometr_vitalnia_temperature
+    humidity_sensor: sensor.termometr_vitalnia_humidity
     power_sensor: switch.smart_plug_socket_1
-
-telegram_bot:
-  - platform: polling
-    api_key: !secret telegram_api_key
-    allowed_chat_ids:
-      - !secret telegram_chat_id
 
 notify:
   - name: telegram
     platform: telegram
     chat_id: !secret telegram_chat_id
 
+  - name: discovered_devices_logger
+    platform: file
+    filename: discovered_devices.log
+    timestamp: false
+
 input_boolean:
   reset_statistics:
     name: Reset Statistics
     initial: off
     icon: mdi:refresh
+    
+input_number:
+  battery_power_start:
+    name: Початковий стан батареї
+    min: 0
+    max: 10000  # Встановіть максимальне значення, залежно від максимальної можливої потужності
+    step: 0.01
+    unit_of_measurement: "Вт⋅год"
+    mode: box
+    
+homeassistant:
+  allowlist_external_dirs:
+    - "/config"
+  allowlist_external_urls:
+    - "http://192.168.0.254"
+  name: Home
+  country: UA
+  time_zone: Europe/Kyiv
+  auth_providers:
+    - type: homeassistant
+      allow_bypass_login_attempts: false
+    
+light:
+  - platform: group
+    name: "Люстра в вітальні"
+    entities:
+      - light.rgbcw_lightbulb1
+      - light.rgbcw_lightbulb2
+      - light.rgbcw_lightbulb3
+      - light.rgbcw_lightbulb4
+      
+shell_command:
+  delete_file: rm "{{ path }}"
+  copy_frigate_snapshot: cp "{{ source }}" "{{ dest }}"

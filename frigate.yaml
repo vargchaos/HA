@@ -1,0 +1,73 @@
+mqtt:
+  enabled: true
+  host: 192.168.0.188
+  topic_prefix: frigate
+  client_id: frigate
+  user: mqtt
+  password: mqtt
+  stats_interval: 60
+
+cameras:
+  cam1:
+    ffmpeg:
+      inputs:
+        - path: 
+            rtsp://admin:RR99t0393@192.168.0.252:554/user=admin_password=RR99t0393_channel=1_stream=0.sdp
+          roles:
+            - detect
+    detect:
+      enabled: true
+      fps: 5
+      max_disappeared: 5 
+    snapshots:
+      enabled: true
+      timestamp: false
+      bounding_box: true
+      retain:
+        default: 1
+    motion:
+      enabled: true
+      contour_area: 50
+      threshold: 150
+      improve_contrast: true
+      mask: 0.067,0.466,0.388,0.386,0.462,0.606,0.59,0.524,0.75,0.997,0.097,0.997
+    objects:
+      track:
+        - person
+      filters:
+        person:
+          mask: 0.067,0.464,0.386,0.391,0.461,0.605,0.591,0.523,0.749,0.997,0.096,0.997
+    zones:
+      Парадна:
+        coordinates: 
+          0.102,0.996,0.074,0.461,0.393,0.385,0.465,0.604,0.598,0.516,0.754,0.996,0.366,0.996,0.207,0.996
+        loitering_time: 1
+        inertia: 1
+        objects: person
+    review:
+      detections:
+        required_zones: Парадна
+record:
+  enabled: false
+
+birdseye:
+  enabled: false
+
+detect:
+  enabled: true
+  max_disappeared: 5
+
+ffmpeg:
+  global_args: -hide_banner -loglevel warning
+  hwaccel_args:
+    - -hwaccel
+    - vaapi
+    - -hwaccel_device
+    - /dev/dri/renderD128
+    - -hwaccel_output_format
+    - yuv420p
+
+logger:
+  default: info
+
+version: 0.14

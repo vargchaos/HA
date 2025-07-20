@@ -1,17 +1,26 @@
-  - id: reset_statistics_manual
-    alias: "Reset statistics manually"
-    trigger:
-      - platform: state
-        entity_id: input_boolean.reset_statistics
-        to: "on"
-    action:
-      - service: homeassistant.update_entity
-        target:
-          entity_id:
-            - sensor.total_grid_power_day
-            - sensor.delta_2_day_battery_discharge
-            - sensor.delta_2_day_battery_charge
-            - sensor.total_power_day
-      - service: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.reset_statistics
+- id: '1734114254209'
+  alias: Low Battery Notifications & Actions
+  description: ''
+  use_blueprint:
+    path: Blackshome/low-battery-notifications-and-actions.yaml
+    input:
+      exclude_sensors:
+        entity_id: []
+        area_id:
+        - vitalnia
+        - kabinet
+      include_easy_notify: disabled_easy_notify
+      custom_group:
+        entity_id: []
+        area_id:
+        - vitalnia
+        - kabinet
+      custom_group_battery_level: 10
+      battery_level: 10
+      include_persistent_notification: enable_persistent_notification
+      notify_device:
+      - 64102b42ec264f036969374cb9fbf0d6
+      notify_data:
+      - high_priority
+
+

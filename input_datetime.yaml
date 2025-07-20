@@ -1,0 +1,9 @@
+power_outage_start:
+  name: "Час початку відключення живлення"
+  has_date: true
+  has_time: true
+
+grid_power_last_reset:
+  name: "Останнє скидання потужності з мережі"
+  has_date: true
+  has_time: true
